@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Checklist – Viagem Corporativa</title>
+    <!-- Tailwind CSS para estilização moderna e responsiva -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Estilos extras para a barra de rolagem e transições suaves */
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+        .transition-all { transition: all 0.3s ease; }
+        .item-text[contenteditable="true"]:focus {
+            outline: none;
+            border-bottom: 2px solid #3b82f6;
+            background: #eff6ff;
+            border-radius: 4px;
+            padding: 4px;
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen pb-20">
+
+    <!-- Cabeçalho Fixo -->
+    <header class="bg-white shadow-sm sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8">
+            <div class="flex flex-row justify-between items-center gap-2">
+                <h1 class="text-lg sm:text-2xl font-bold text-slate-900 flex items-center gap-2 flex-1">
+                    <svg class="w-6 h-6 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span class="truncate">Viagem Corporativa</span>
+                    <span class="text-xs font-normal text-slate-500 bg-slate-100 px-2 py-1 rounded-full whitespace-nowrap hidden sm:inline-block">4 dias</span>
+                </h1>
+                <button onclick="resetChecklist()" class="text-sm text-red-600 hover:bg-red-50 p-2 sm:px-3 sm:py-1.5 rounded-lg transition-all flex items-center gap-1">
+                    <svg class="w-5 h-5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    <span class="hidden sm:inline">Reiniciar</span>
+                </button>
+            </div>
+            
+            <!-- Barra de Progresso Geral -->
+            <div class="mt-4">
+                <div class="flex justify-between text-sm text-slate-600 mb-1">
+                    <span id="progress-text">Progresso Geral: 0%</span>
+                    <span id="progress-count">0 / 0 itens</span>
+                </div>
+                <div class="w-full bg-slate-200 rounded-full h-2.5">
+                <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Container Principal (Grid de Categorias) -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 sm:mt-8">
+        <div id="categories-container" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+            <!-- As categorias serão injetadas aqui pelo JavaScript -->
+        </div>
+    </main>
+
+    <script>
+        // Dados Iniciais (Atualizados com SVGs e sem emojis)
+        const defaultData = [
+            {
+                name: "Documentos e itens",
+                icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>',
+                items: [
+                    { text: "RG ou CNH", done: false },
+                    { text: "Cartões de crédito/débito", done: false },
+                    { text: "Dinheiro em espécie", done: false },
+                    { text: "Passagens", done: false },
+                    { text: "Reservas de hotel", done: false },
+                    { text: "Endereços das franquias", done: false },
+                    { text: "Cartão de visitas", done: false },
+                    { text: "Seguro viagem", done: false },
+                    { text: "Carregadores dos eletrônicos", done: false },
+                    { text: "Power bank carregado", done: false },
+                    { text: "Fones de ouvido", done: false }
+                ]
+            },
+            {
+                name: "Trabalho",
+                icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>',
+                items: [
+                    { text: "Notebook", done: false },
+                    { text: "Carregador do notebook", done: false },
+                    { text: "Mouse", done: false },
+                    { text: "Adaptador HDMI", done: false },
+                    { text: "Pendrive", done: false },
+                    { text: "Caderno ou bloco", done: false },
+                    { text: "Canetas", done: false },
+                    { text: "Contratos impressos", done: false },
+                    { text: "Material da empresa", done: false },
+                    { text: "Agenda", done: false }
+                ]
+            },
+            {
+                name: "Roupas",
+                icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>',
+                items: [
+                    { text: "4 looks sociais/esporte fino", done: false },
+                    { text: "1 blazer extra", done: false },
+                    { text: "1 roupa para dormir", done: false },
+                    { text: "5 peças íntimas", done: false },
+                    { text: "5 pares de meia", done: false },
+                    { text: "Sapato social", done: false },
+                    { text: "Tênis confortável", done: false },
+                    { text: "Chinelo", done: false },
+                    { text: "Casaco leve", done: false },
+                    { text: "Guarda-chuva", done: false }
+                ]
+            },
+            {
+                name: "Higiene pessoal",
+                icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>',
+                items: [
+                    { text: "Escova de dentes", done: false },
+                    { text: "Creme dental", done: false },
+                    { text: "Fio dental", done: false },
+                    { text: "Desodorante", done: false },
+                    { text: "Shampoo", done: false },
+                    { text: "Condicionador", done: false },
+                    { text: "Sabonete", done: false },
+                    { text: "Hidratante labial", done: false },
+                    { text: "Escova/pente", done: false },
+                    { text: "Protetor solar", done: false },
+                    { text: "Perfume", done: false },
+                    { text: "Remédios de uso contínuo", done: false }
+                ]
+            },
+            {
+                name: "Medicamentos",
+                icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>',
+                items: [
+                    { text: "Remédio para enjoo", done: false },
+                    { text: "Analgésico", done: false },
+                    { text: "Antialérgico", done: false },
+                    { text: "Remédio para azia", done: false }
+                ]
+            },
+            {
+                name: "Deslocamentos",
+                icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"></path></svg>',
+                items: [
+                    { text: "Balas de gengibre", done: false },
+                    { text: "Gengibre cristalizado/cápsulas", done: false },
+                    { text: "Chiclete de hortelã", done: false },
+                    { text: "Garrafa de água", done: false },
+                    { text: "Biscoitos água e sal", done: false },
+                    { text: "Saquinho para enjoo", done: false },
+                    { text: "Lenços de papel", done: false },
+                    { text: "Lenços umedecidos", done: false }
+                ]
+            },
+            {
+                name: "Estratégias (Cinetose)",
+                icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>',
+                items: [
+                    { text: "Banco da frente (carro/Uber)", done: false },
+                    { text: "Evitar mexer no celular", done: false },
+                    { text: "Olhar para o horizonte", done: false },
+                    { text: "Fazer refeições leves", done: false },
+                    { text: "Evitar café/gorduras", done: false },
+                    { text: "Manter ar/janela abertos", done: false }
+                ]
+            },
+            {
+                name: "Itens úteis",
+                icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>',
+                items: [
+                    { text: "Celular carregado", done: false },
+                    { text: "Download de mapas offline", done: false },
+                    { text: "Lista de contatos", done: false },
+                    { text: "Aplicativos de transporte", done: false },
+                    { text: "Aplicativo do banco", done: false },
+                    { text: "App do hotel/aérea", done: false }
+                ]
+            },
+            {
+                name: "Antes de sair de casa",
+                icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>',
+                items: [
+                    { text: "Desligar eletrodomésticos", done: false },
+                    { text: "Fechar portas e janelas", done: false },
+                    { text: "Separar chaves", done: false },
+                    { text: "Verificar documentos", done: false },
+                    { text: "Conferir carteira e celular", done: false },
+                    { text: "Kit anti-enjoo na mochila", done: false }
+                ]
+            }
+        ];
+
+        // Inicialização do Estado (Pega do localStorage ou usa o padrão)
+        let checklistData = [];
+        
+        function loadData() {
+            // Mudou a chave de cache para limpar a versão antiga com emojis
+            const saved = localStorage.getItem('corporateChecklist_svg_v1');
+            if (saved) {
+                checklistData = JSON.parse(saved);
+            } else {
+                checklistData = JSON.parse(JSON.stringify(defaultData)); 
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('corporateChecklist_svg_v1', JSON.stringify(checklistData));
+            updateProgress();
+        }
+
+        // Ações do Checklist
+        function toggleItem(catIndex, itemIndex) {
+            checklistData[catIndex].items[itemIndex].done = !checklistData[catIndex].items[itemIndex].done;
+            saveData();
+            render();
+        }
+
+        function deleteItem(catIndex, itemIndex) {
+            if(confirm("Remover este item?")) {
+                checklistData[catIndex].items.splice(itemIndex, 1);
+                saveData();
+                render();
+            }
+        }
+
+        function addItem(catIndex) {
+            const input = document.getElementById(`new-item-${catIndex}`);
+            const text = input.value.trim();
+            if (text) {
+                checklistData[catIndex].items.push({ text: text, done: false });
+                input.value = '';
+                saveData();
+                render();
+            }
+        }
+
+        function handleAddEnter(event, catIndex) {
+            if (event.key === 'Enter') {
+                addItem(catIndex);
+            }
+        }
+
+        function saveEdit(catIndex, itemIndex, element) {
+            const newText = element.innerText.trim();
+            if (newText && newText !== checklistData[catIndex].items[itemIndex].text) {
+                checklistData[catIndex].items[itemIndex].text = newText;
+                saveData();
+            } else if (!newText) {
+                element.innerText = checklistData[catIndex].items[itemIndex].text; 
+            }
+        }
+
+        function handleEditKeydown(event, catIndex, itemIndex, element) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); 
+                element.blur(); 
+            }
+        }
+
+        function resetChecklist() {
+            if(confirm("Tem certeza que deseja reiniciar todo o checklist?")) {
+                checklistData = JSON.parse(JSON.stringify(defaultData));
+                saveData();
+                render();
+            }
+        }
+
+        // Atualização Visual
+        function updateProgress() {
+            let total = 0;
+            let done = 0;
+
+            checklistData.forEach(cat => {
+                cat.items.forEach(item => {
+                    total++;
+                    if(item.done) done++;
+                });
+            });
+
+            const percentage = total === 0 ? 0 : Math.round((done / total) * 100);
+            
+            document.getElementById('progress-bar').style.width = `${percentage}%`;
+            document.getElementById('progress-text').innerText = `Progresso: ${percentage}%`;
+            document.getElementById('progress-count').innerText = `${done} / ${total}`;
+            
+            const bar = document.getElementById('progress-bar');
+            if(percentage === 100) {
+                bar.classList.replace('bg-blue-600', 'bg-green-500');
+            } else {
+                bar.classList.replace('bg-green-500', 'bg-blue-600');
+            }
+        }
+
+        function render() {
+            const container = document.getElementById('categories-container');
+            container.innerHTML = '';
+
+            checklistData.forEach((category, cIndex) => {
+                
+                const catTotal = category.items.length;
+                const catDone = category.items.filter(i => i.done).length;
+                const isAllDone = catTotal > 0 && catTotal === catDone;
+
+                const card = document.createElement('div');
+                card.className = `bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col transition-all ${isAllDone ? 'ring-2 ring-green-400 opacity-90' : ''}`;
+                
+                // Exibe o SVG armazenado nos dados
+                const catIcon = category.icon;
+
+                let html = `
+                    <div class="bg-slate-50 px-4 py-3 border-b border-slate-200 flex justify-between items-center">
+                        <h2 class="font-semibold text-base sm:text-lg text-slate-800 flex items-center gap-2">
+                            <span class="${isAllDone ? 'text-green-600' : 'text-slate-500'}">${catIcon}</span>
+                            ${category.name}
+                        </h2>
+                        <span class="text-xs font-medium px-2 py-1 rounded-full ${isAllDone ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}">
+                            ${catDone}/${catTotal}
+                        </span>
+                    </div>
+                    <ul class="p-2 sm:p-4 space-y-1 sm:space-y-3 flex-1 overflow-y-auto max-h-[50vh] sm:max-h-[400px] hide-scrollbar">
+                `;
+
+                if (category.items.length === 0) {
+                    html += `<li class="text-slate-400 text-sm text-center italic py-4">Nenhum item nesta categoria.</li>`;
+                }
+
+                category.items.forEach((item, iIndex) => {
+                    // Ícones SVG para marcar como feito ou pendente
+                    const checkIcon = item.done 
+                        ? '<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>'
+                        : '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+
+                    html += `
+                        <li class="flex items-center gap-3 group transition-all p-2 rounded-lg hover:bg-slate-50 ${item.done ? 'opacity-60' : ''}">
+                            <button onclick="toggleItem(${cIndex}, ${iIndex})" class="flex-shrink-0 transition-colors focus:outline-none ${item.done ? 'text-green-500' : 'text-slate-300 hover:text-blue-400'}">
+                                ${checkIcon}
+                            </button>
+                            
+                            <span 
+                                class="item-text flex-1 outline-none transition-all text-sm sm:text-base ${item.done ? 'line-through text-slate-500' : 'text-slate-700'} cursor-text break-words"
+                                contenteditable="true"
+                                onblur="saveEdit(${cIndex}, ${iIndex}, this)"
+                                onkeydown="handleEditKeydown(event, ${cIndex}, ${iIndex}, this)"
+                                title="Clique para editar"
+                            >${item.text}</span>
+                            
+                            <!-- Botão Lixeira em SVG -->
+                            <button onclick="deleteItem(${cIndex}, ${iIndex})" class="text-slate-300 hover:text-red-500 transition-colors sm:opacity-0 group-hover:opacity-100 p-2 focus:outline-none" title="Excluir">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                        </li>
+                    `;
+                });
+
+                html += `
+                    </ul>
+                    <div class="p-3 sm:p-4 border-t border-slate-100 bg-white flex gap-2">
+                        <input type="text" id="new-item-${cIndex}" onkeydown="handleAddEnter(event, ${cIndex})" placeholder="Adicionar item..." class="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 sm:py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                        <button onclick="addItem(${cIndex})" class="bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2 sm:py-2.5 transition-colors flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1" title="Adicionar">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        </button>
+                    </div>
+                `;
+                
+                card.innerHTML = html;
+                container.appendChild(card);
+            });
+
+            updateProgress();
+        }
+
+        // Inicializar
+        loadData();
+        render();
+
+    </script>
+</body>
+</html>
